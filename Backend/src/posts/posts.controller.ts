@@ -10,41 +10,41 @@ export class PostsController {
 
     //endpoint para crear un nuevo post
     @Post()
-    create(@Body() createPostDto: CreatePostDto) {
-        return ApiResponse.success(this.postsService.create(createPostDto), 'Post creado exitosamente');
+    async create(@Body() createPostDto: CreatePostDto) {
+        return ApiResponse.success(await this.postsService.create(createPostDto), 'Post creado exitosamente');
     }
 
     //endpoint para obtener todos los posts
     @Get()
-    findAll() {
-        return ApiResponse.success(this.postsService.findAll(), 'Posts obtenidos exitosamente');
+    async findAll() {
+        return ApiResponse.success(await this.postsService.findAll(), 'Posts obtenidos exitosamente');
     }
 
     //endpoint para obtener un post por su id
     @Get(':id')
-    findOne(@Param('id') id: string) {
-        return ApiResponse.success(this.postsService.findOne(id), 'Post obtenido exitosamente');
+    async findOne(@Param('id') id: string) {
+        return ApiResponse.success(await this.postsService.findOne(id), 'Post obtenido exitosamente');
     }
 
     //endpoint para actualizar un post por su id
     @Put(':id')
-    update(
+    async update(
         @Param('id') id: string,
         @Body() dto: UpdatePostDto,
     ) {
-        return ApiResponse.success(this.postsService.update(id, dto), 'Post actualizado exitosamente');
+        return ApiResponse.success(await this.postsService.update(id, dto), 'Post actualizado exitosamente');
     }
 
     //endpoint para eliminar un post por su id
     @Delete(':id')
-    remove(@Param('id') id: string) {
-        return ApiResponse.success(this.postsService.remove(id), 'Post eliminado exitosamente');
+    async remove(@Param('id') id: string) {
+        return ApiResponse.success(await this.postsService.remove(id), 'Post eliminado exitosamente');
     }
 
     // endpoint para crear multiples posts
     @Post('bulk')
-    bulkCreate(@Body() posts: CreatePostDto[]) {
-        return ApiResponse.success(this.postsService.bulkCreate(posts), 'Posts creados exitosamente');
-    }   
+    async bulkCreate(@Body() posts: CreatePostDto[]) {
+        return ApiResponse.success(await this.postsService.bulkCreate(posts), 'Posts creados exitosamente');
+    }
 
 }
