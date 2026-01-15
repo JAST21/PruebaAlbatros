@@ -20,8 +20,8 @@ export class CommentsController {
     }
 
     //endpoint para obtener comentarios por postId
-    @Get()
-    async findCommentsByPostId(@Body('postId') postId: string) {
+    @Get(':postId')
+    async findCommentsByPostId(@Param('postId') postId: string) {
         const comments = await this.commentsService.findByPostId(postId);
         return ApiResponse.success(comments, 'Comentarios obtenidos exitosamente');
     }

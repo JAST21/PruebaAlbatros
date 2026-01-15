@@ -1,0 +1,97 @@
+<div class="max-w-7xl mx-auto p-6">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-semibold text-gray-800">Posts</h2>
+    <button 
+      class="px-4 py-2 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 transition"
+      (click)="createPost()"
+    >
+      + Crear Post
+    </button>
+  </div>
+
+  <!-- Buscador -->
+  <div class="mb-6">
+    <input
+      type="text"
+      placeholder="Buscar por título, autor o contenido..."
+      [value]="search()"
+      (input)="onSearchChange($any($event.target).value)"
+      class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading()" class="flex justify-center items-center py-12">
+    <p class="text-gray-600">Cargando posts...</p>
+  </div>
+
+  <!-- Lista de Posts -->
+  <div *ngIf="!loading()">
+    <!-- Mensaje cuando no hay posts -->
+    <div *ngIf="filteredPosts().length === 0" class="text-center py-12">
+      <p class="text-gray-600" *ngIf="search()">
+        No se encontraron posts con "{{ search() }}"
+      </p>
+      <p class="text-gray-600" *ngIf="!search()">
+        No hay posts disponibles. ¡Crea el primero!
+      </p>
+    </div>
+
+    <!-- Grid de Posts -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" *ngIf="filteredPosts().length > 0">
+      <div 
+        class="bg-white rounded-xl shadow-md hover:shadow-lg transition p-5" 
+        *ngFor="let post of filteredPosts()"
+      >
+        <!-- Header del post -->
+        <div class="mb-3">
+          <h3 class="text-lg font-semibold text-gray-800 mb-1">{{ post.title }}</h3>
+          <span class="text-sm text-gray-500">por {{ post.author }}</span>
+        </div>
+
+        <!-- Contenido -->
+        <p class="text-gray-700 text-sm mb-4 line-clamp-3">
+          {{ post.body.length > 150 ? (post.body.substring(0, 150) + '...') : post.body }}
+        </p>
+
+        <!-- Footer con fechas -->
+        <div class="border-t border-gray-200 pt-3">
+          <div class="text-xs text-gray-500 space-y-1 mb-3">
+            <div>
+              <span class="font-medium">Creado:</span> {{ post.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+            </div>
+            <div>
+              <span class="font-medium">Actualizado:</span> {{ post.updatedAt | date: 'dd/MM/yyyy HH:mm' }}
+            </div>
+          </div>
+
+          <!-- Acciones -->
+          <div class="flex gap-2">
+            <button
+              class="flex-1 px-3 py-1.5 text-sm rounded-lg font-medium text-white bg-green-600 hover:bg-green-700 transition"
+              (click)="viewPostDetails(post._id)"
+              title="Ver detalle"
+            >
+              Ver
+            </button>
+            <button
+              class="flex-1 px-3 py-1.5 text-sm rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 transition"
+              (click)="editPost(post._id)"
+              title="Editar"
+            >
+              Editar
+            </button>
+            <button
+              class="flex-1 px-3 py-1.5 text-sm rounded-lg font-medium text-white bg-red-600 hover:bg-red-700 transition"
+              (click)="deletePost(post._id)"
+              title="Eliminar"
+            >
+              Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

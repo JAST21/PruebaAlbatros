@@ -1,4 +1,4 @@
-import { Document, Types } from "mongoose";
+import mongoose, { Document, Types } from "mongoose";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 
 @Schema({
@@ -9,8 +9,8 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 })
 export class Comment extends Document {
 
-    @Prop({ type: Types.ObjectId, ref: "Post", required: true })// Relación con el esquema de Post
-    postId: string;
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "Post", required: true })// Relación con el esquema de Post
+    postId: mongoose.Types.ObjectId;// ID del post al que pertenece el comentario
 
     @Prop({ required: true })
     name: string;

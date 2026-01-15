@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Comment } from './schemas/comment.schema';
 import { CreateCommentDto } from './dto/CreateCommentDto.dto';
 
@@ -20,8 +20,10 @@ export class CommentsService {
 
     // obtiene todos los comentarios de un post por su postId
     async findByPostId(postId: string) {
-        const comments = await this.commentModel.find({ postId }).sort({ createdAt: -1 }).exec();
-        return comments;
+        return this.commentModel
+            .find({ postId: new Types.ObjectId(postId) })
+            .sort({ createdAt: -1 })
+            .exec();
     }
 
     // elimina un comentario por su id
@@ -32,5 +34,5 @@ export class CommentsService {
         }
         return deletedComment;
     }
-    
+
 }
