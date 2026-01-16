@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, catchError, delay, tap, switchMap } from 'rxjs';
 import { Comment } from '../../../shared/models/comment.model';
 import { ApiResponse } from '../../../shared/models/apiResponse.model';
 
@@ -14,11 +14,25 @@ export class CommentsService {
 
   constructor(private http: HttpClient) { }
 
+  comments = signal<Comment[]>([]);
+  loading = signal<boolean>(false);
   // metodo para obtener comentarios por ID de post
   getByPost(postId: string): Observable<ApiResponse<Comment[]>> {
-    return this.http.get<ApiResponse<Comment[]>>(
-      `${this.apiUrl}/${postId}`
-    );
+    this.loading.set(true);
+
+    return this.http
+      .get<ApiResponse<Comment[]>>(`${this.apiUrl}/${postId}`)
+      .pipe(
+        delay(300),
+        tap(response => {
+          this.comments.set(response.data);
+          this.loading.set(false);
+        }),
+        catchError(error => {
+          this.loading.set(false);
+          throw error;
+        })
+      );
   }
 
 
@@ -28,12 +42,22 @@ export class CommentsService {
     name: string;
     email: string;
     body: string;
-  }): Observable<ApiResponse<Comment>> {
-    return this.http.post<ApiResponse<Comment>>(this.apiUrl, commentData);
+  }): Observable<ApiResponse<Comment[]>> {
+    return this.http.post<ApiResponse<Comment>>(this.apiUrl, commentData).pipe(
+      switchMap(() => this.getByPost(commentData.postId)),
+      catchError(error => {
+        throw error;
+      })
+    );
   }
 
   // metodo para eliminar comentario
-  removeComment(commentId: string): Observable<ApiResponse<Comment>> {
-    return this.http.delete<ApiResponse<Comment>>(`${this.apiUrl}/${commentId}`);
+  removeComment(commentId: string, postId: string): Observable<ApiResponse<Comment[]>> {
+    return this.http.delete<ApiResponse<Comment>>(`${this.apiUrl}/${commentId}`).pipe(
+      switchMap(() => this.getByPost(postId)),
+      catchError(error => {
+        throw error;
+      })
+    );
   }
 }

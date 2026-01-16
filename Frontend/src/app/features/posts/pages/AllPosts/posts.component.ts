@@ -4,11 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { PostsService } from '../../services/posts.service';
 import { Post } from '../../../../shared/models/post.model';
+import { TruncatePipe } from '../../../../shared/pipes/truncate.pipe';
+import { HighlightDirective } from '../../../../shared/directives/highlight.directive';
 // Decorador del componente
+
 @Component({
   selector: 'app-posts',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TruncatePipe, HighlightDirective],
   templateUrl: './posts.component.html',
   styleUrl: './posts.component.css'
 })
@@ -17,15 +20,17 @@ import { Post } from '../../../../shared/models/post.model';
 export class PostsComponent implements OnInit {
 
   //signals
-  posts = signal<Post[]>([]);
-  loading = signal<boolean>(false);
+  posts = this.postsService.posts;
+  loading = this.postsService.loading;
   search = signal<string>('');
 
+  // computed para filtrar posts según el término de búsqueda
   filteredPosts = computed(() => {
     const searchTerm = this.search().toLowerCase();
     if (!searchTerm) {
       return this.posts();
     }
+    // Filtra los posts que coinciden con el término de búsqueda en título, cuerpo o autor
     return this.posts().filter(post =>
       post.title.toLowerCase().includes(searchTerm) ||
       post.body.toLowerCase().includes(searchTerm) ||

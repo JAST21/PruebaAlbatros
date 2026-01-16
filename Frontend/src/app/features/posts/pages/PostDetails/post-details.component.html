@@ -1,56 +1,126 @@
-<div class="max-w-3xl mx-auto mt-10">
-    <!-- Loading -->
-    <div *ngIf="loading" class="text-center text-gray-500">
-        Cargando...
-    </div>
+<div class="max-w-3xl mx-auto mt-10 px-4">
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center text-gray-500 py-8">Cargando...</div>
 
-    <!-- Post -->
-    <div *ngIf="post" class="bg-white p-6 rounded-xl shadow mb-8">
-        <h1 class="text-3xl font-bold mb-2">{{ post.title }}</h1>
-        <p class="text-sm text-gray-500 mb-4">
-            Por {{ post.author }} · {{ post.createdAt | date:'mediumDate' }}
-        </p>
-        <p class="text-gray-800 whitespace-pre-line">
-            {{ post.body }}
-        </p>
-    </div>
-
-    <!-- Comentarios -->
-    <div class="bg-white p-6 rounded-xl shadow mb-6">
-        <h2 class="text-xl font-semibold mb-4">Comentarios</h2>
-
-        <div *ngIf="comments.length === 0" class="text-gray-500">
-            No hay comentarios aún
+  <!-- Post Detail -->
+  <div *ngIf="post" class="bg-white rounded-xl shadow mb-6">
+    <!-- Post Header -->
+    <div class="p-6 border-b border-gray-200">
+      <!-- Back Button -->
+      <div class="mb-4">
+        <button
+          type="button"
+          class="text-sm text-blue-600 hover:underline"
+          (click)="goBack()"
+        >
+          ← Volver
+        </button>
+        <h1 class="text-3xl font-bold text-gray-900 mb-3">{{ post.title }}</h1>
+        <div class="flex items-center gap-2 text-sm text-gray-500">
+          <span class="font-medium text-gray-700">{{ post.author }}</span>
+          <span>·</span>
+          <span>{{ post.createdAt | date : "mediumDate" }}</span>
         </div>
+      </div>
 
-        <div *ngFor="let comment of comments" class="border-b py-3">
-            <p class="font-medium">{{ comment.name }}</p>
-            <p class="text-sm text-gray-500">{{ comment.email }}</p>
-            <p class="mt-1">{{ comment.body }}</p>
+      <!-- Post Body -->
+      <div class="p-6">
+        <p class="text-gray-800 whitespace-pre-line leading-relaxed">
+          {{ post.body }}
+        </p>
+      </div>
+    </div>
 
-            <button class="text-sm text-red-500 mt-2 hover:underline" (click)="deleteComment(comment._id)">
+    <!-- Comments Section -->
+    <div class="bg-white rounded-xl shadow mb-6">
+      <div class="p-6 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-900">
+          Comentarios ({{ comments.length }})
+        </h2>
+      </div>
+
+      <!-- No comments message -->
+      <div *ngIf="comments.length === 0" class="p-6 text-center text-gray-500">
+        No hay comentarios aún. Sé el primero en comentar.
+      </div>
+      <div class="mb-4">
+        <!-- Comments List -->
+        <div *ngIf="comments.length > 0" class="divide-y divide-gray-200">
+          <div
+            *ngFor="let comment of comments"
+            class="p-6 hover:bg-gray-50 transition"
+          >
+            <div class="flex items-start justify-between mb-2">
+              <div>
+                <p class="font-semibold text-gray-900">{{ comment.name }}</p>
+                <p class="text-sm text-gray-500">{{ comment.email }}</p>
+              </div>
+              <button
+                class="text-sm text-red-600 hover:text-red-700 hover:underline transition"
+                (click)="deleteComment(comment._id)"
+              >
                 Eliminar
-            </button>
+              </button>
+            </div>
+            <p class="text-gray-800 leading-relaxed mt-3">{{ comment.body }}</p>
+          </div>
         </div>
-    </div>
+      </div>
 
-    <!-- Form comentario -->
-    <div class="bg-white p-6 rounded-xl shadow">
-        <h3 class="text-lg font-semibold mb-4">Agregar comentario</h3>
+      <!-- Add Comment Form -->
+      <div class="bg-white rounded-xl shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+          Agregar comentario
+        </h3>
 
-        <form [formGroup]="commentForm" (ngSubmit)="addComment()" class="space-y-4">
-            <input type="text" placeholder="Nombre" formControlName="name" class="w-full border rounded-lg px-3 py-2" />
+        <form
+          [formGroup]="commentForm"
+          (ngSubmit)="addComment()"
+          class="space-y-4"
+        >
+          <div>
+            <input
+              required
+              type="text"
+              placeholder="Tu nombre"
+              formControlName="name"
+              class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+            />
+          </div>
 
-            <input type="email" placeholder="Email" formControlName="email"
-                class="w-full border rounded-lg px-3 py-2" />
+          <div>
+            <input
+              required
+              type="email"
+              placeholder="Tu email"
+              formControlName="email"
+              class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+            />
+          </div>
 
-            <textarea placeholder="Comentario" formControlName="body" rows="3"
-                class="w-full border rounded-lg px-3 py-2"></textarea>
+          <div>
+            <textarea
+              required
+              placeholder="Escribe tu comentario..."
+              formControlName="body"
+              rows="4"
+              class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"
+            ></textarea>
+          </div>
 
-            <button type="submit" [disabled]="commentForm.invalid"
-                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition cursor-pointer">
-                Comentar
+          <div class="flex justify-end">
+            <button
+              type="submit"
+              [disabled]="commentForm.invalid"
+              [class.opacity-50]="commentForm.invalid"
+              [class.cursor-not-allowed]="commentForm.invalid"
+              class="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition font-medium"
+            >
+              Publicar comentario
             </button>
+          </div>
         </form>
+      </div>
     </div>
+  </div>
 </div>

@@ -8,7 +8,8 @@ import {
   ReactiveFormsModule
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-
+import { Location } from '@angular/common';
+import { BaseComponent } from '../../../../shared/components/base.component';
 
 @Component({
   selector: 'app-post-form',
@@ -17,7 +18,7 @@ import { ActivatedRoute, Router } from '@angular/router';
   templateUrl: './post-form.component.html',
   styleUrl: './post-form.component.css'
 })
-export class PostFormComponent implements OnInit {
+export class PostFormComponent extends BaseComponent implements OnInit {
 
   form!: FormGroup;
   postId?: string;
@@ -25,11 +26,12 @@ export class PostFormComponent implements OnInit {
   loading = false;
 
   constructor(
+    location: Location,
     private fb: FormBuilder,
     private postsService: PostsService,
     private route: ActivatedRoute,
     private router: Router
-  ) { }
+  ) { super(location); }
 
   // Inicialización del componente
   ngOnInit(): void {

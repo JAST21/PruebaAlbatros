@@ -4,7 +4,9 @@ import { PostsService } from '../../services/posts.service';
 import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommentsService } from '../../../comments/services/comments.service';
-
+import { BaseComponent } from '../../../../shared/components/base.component';
+import { Location } from '@angular/common';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-post-details',
@@ -12,7 +14,7 @@ import { CommentsService } from '../../../comments/services/comments.service';
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './post-details.component.html',
 })
-export class PostDetailsComponent implements OnInit {
+export class PostDetailsComponent extends BaseComponent implements OnInit {
 
   post: any;
   comments: any[] = [];
@@ -21,11 +23,13 @@ export class PostDetailsComponent implements OnInit {
   commentForm!: FormGroup;
 
   constructor(
+    location: Location,
+    private notificationserv: NotificationService,
     private postsService: PostsService,
     private commentsService: CommentsService,
     private route: ActivatedRoute,
     private fb: FormBuilder
-  ) { }
+  ) { super(location); }
 
   ngOnInit(): void {
     const postId = this.route.snapshot.paramMap.get('id') || '';
@@ -41,6 +45,8 @@ export class PostDetailsComponent implements OnInit {
       body: ['', Validators.required]
     });
   }
+
+
 
   // Cargar el post por ID
   loadPost(id: string): void {
@@ -84,11 +90,17 @@ export class PostDetailsComponent implements OnInit {
   }
 
   // Eliminar un comentario
-  deleteComment(commentId: string): void {
-    this.commentsService.removeComment(commentId).subscribe({
+  deleteComment(id: string) {
+    if (!confirm('¿Eliminar este comentario?')) return;
+
+    this.commentsService.removeComment(id, this.post._id).subscribe({
       next: () => {
-        this.comments = this.comments.filter(comment => comment._id !== commentId); // Actualiza la lista de comentarios localmente
+        this.notificationserv.showSuccess('Comentario eliminado correctamente');
       },
+      error: () => {
+        this.notificationserv.showError('No se pudo eliminar el comentario');
+      }
     });
   }
+
 }

@@ -1,8 +1,10 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { catchError, delay, Observable, tap } from 'rxjs';
+import { catchError, delay, Observable, switchMap, tap, retry } from 'rxjs';
 import { Post } from '../../../shared/models/post.model';
 import { ApiResponse } from '../../../shared/models/apiResponse.model';
+import { buildQueryParams } from '../../../core/utils/http-utils';
+import { query } from '@angular/animations';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +12,7 @@ import { ApiResponse } from '../../../shared/models/apiResponse.model';
 export class PostsService {
 
   private apiUrl = 'http://localhost:3000/posts';
-  
+
 
   posts = signal<Post[]>([]); // Signal para almacenar los posts
   loading = signal<boolean>(false); // Signal para el estado de carga
@@ -18,18 +20,28 @@ export class PostsService {
   constructor(private http: HttpClient) { }
 
 
-  // Método para obtener los posts
-  getPosts(): Observable<ApiResponse<Post[]>> {
+  // Método para obtener todos los posts
+  getPosts(search = '', page = 1): Observable<ApiResponse<Post[]>> {
     this.loading.set(true);
-    return this.http.get<ApiResponse<Post[]>>(this.apiUrl).pipe(tap(response => {
-      this.posts.set(response.data);
-      this.loading.set(false);
-    }),
-      catchError(error => {
-        this.loading.set(false);
-        throw error;
-      }
-      ));
+
+    const queryParams = buildQueryParams({ search, page });
+
+    return this.http
+      .get<ApiResponse<Post[]>>(`${this.apiUrl}${queryParams}`)
+      .pipe(
+        retry(2), // Reintenta la solicitud hasta 2 veces en caso de error
+        delay(300), // Simula un retraso de 300ms
+        tap(response => {
+          // Actualiza la señal de posts con los datos recibidos
+          this.posts.set(response.data);
+          this.loading.set(false);
+        }),
+        catchError(error => {
+          // En caso de error, desactiva el estado de carga y relanza el error
+          this.loading.set(false);
+          throw error;
+        })
+      );
   }
 
   // Método para obtener un post por ID
@@ -43,41 +55,35 @@ export class PostsService {
   }
 
   // Método para crear un nuevo post
-  createPost(postData: any): Observable<ApiResponse<Post>> {
+  createPost(postData: any): Observable<ApiResponse<Post[]>> {
     return this.http.post<ApiResponse<Post>>(this.apiUrl, postData).pipe(
-      tap(response => {
-        // Actualiza la señal de posts con el nuevo post
-        this.posts.update(posts => [response.data, ...posts]);
-      }),
+      switchMap(() => this.getPosts()),
       catchError(error => {
         throw error;
       })
     );
   }
+
 
   // Método para actualizar un post existente
-  updatePost(id: string, postData: any): Observable<ApiResponse<Post>> {
+  updatePost(id: string, postData: any): Observable<ApiResponse<Post[]>> {
     return this.http.put<ApiResponse<Post>>(`${this.apiUrl}/${id}`, postData).pipe(
-      tap(response => {
-        // Actualiza la señal de posts con el post actualizado
-        this.posts.update(posts => posts.map(post => post._id === id ? response.data : post));
-      }),
+      switchMap(() => this.getPosts()),
       catchError(error => {
         throw error;
       })
     );
   }
 
+
   // Método para eliminar un post
-  deletePost(id: string): Observable<ApiResponse<Post>> {
+  deletePost(id: string): Observable<ApiResponse<Post[]>> {
     return this.http.delete<ApiResponse<Post>>(`${this.apiUrl}/${id}`).pipe(
-      tap(() => {
-        // Actualiza la señal de posts eliminando el post
-        this.posts.update(posts => posts.filter(post => post._id !== id));
-      }),
+      switchMap(() => this.getPosts()),// Actualiza la lista de posts después de eliminar
       catchError(error => {
         throw error;
       })
     );
   }
+
 }
