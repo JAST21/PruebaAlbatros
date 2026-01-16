@@ -7,7 +7,7 @@ import { CommentsService } from '../../../comments/services/comments.service';
 import { BaseComponent } from '../../../../shared/components/base.component';
 import { Location } from '@angular/common';
 import { NotificationService } from '../../../../core/services/notification.service';
-
+import { AuthService } from '../../../../core/services/auth.service';
 @Component({
   selector: 'app-post-details',
   standalone: true,
@@ -24,27 +24,37 @@ export class PostDetailsComponent extends BaseComponent implements OnInit {
 
   constructor(
     location: Location,
+    private authService: AuthService,
     private notificationserv: NotificationService,
     private postsService: PostsService,
     private commentsService: CommentsService,
     private route: ActivatedRoute,
     private fb: FormBuilder
   ) { super(location); }
-
   ngOnInit(): void {
     const postId = this.route.snapshot.paramMap.get('id') || '';
 
+    //Crear el form primero
+    this.commentForm = this.fb.group({
+      name: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      body: ['', Validators.required],
+    });
+
+    //Autorellenar email desde token
+    const email = this.authService.getEmailFromToken();
+    if (email) {
+      this.commentForm.patchValue({ email });
+      this.commentForm.get('email')?.disable();
+    }
+
+    //Cargar datos
     if (postId) {
       this.loadPost(postId);
       this.loadComments(postId);
     }
-
-    this.commentForm = this.fb.group({
-      name: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],// validadores síncronos van en un arreglo 
-      body: ['', Validators.required]
-    });
   }
+
 
 
 
@@ -73,29 +83,48 @@ export class PostDetailsComponent extends BaseComponent implements OnInit {
 
   // Enviar un nuevo comentario
   addComment(): void {
-    console.log('Post actual:', this.post);
+    if (!this.post) return;
     if (this.commentForm.invalid) return;
 
+    const raw = this.commentForm.getRawValue();
+
     const payload = {
-      ...this.commentForm.value,
-      postId: this.post._id
+      name: raw.name?.trim(),
+      email: raw.email?.trim(),
+      body: raw.body?.trim(),
+      postId: this.post._id,
     };
+
+    if (!payload.name || !payload.email || !payload.body) {
+      this.notificationserv.showError('Todos los campos son obligatorios.');
+      return;
+    }
 
     this.commentsService.createComment(payload).subscribe({
       next: () => {
         this.commentForm.reset();
+
+        // volver a poner el email automáticamente
+        const email = this.authService.getEmailFromToken();
+        if (email) {
+          this.commentForm.patchValue({ email });
+          this.commentForm.get('email')?.disable();
+        }
+
         this.loadComments(this.post._id);
       },
     });
   }
 
-  // Eliminar un comentario
+
+
   deleteComment(id: string) {
     if (!confirm('¿Eliminar este comentario?')) return;
 
     this.commentsService.removeComment(id, this.post._id).subscribe({
       next: () => {
-        this.notificationserv.showSuccess('Comentario eliminado correctamente');
+        //quitarlo de la UI inmediatamente
+        this.comments = this.comments.filter(c => c._id !== id);
       },
       error: () => {
         this.notificationserv.showError('No se pudo eliminar el comentario');

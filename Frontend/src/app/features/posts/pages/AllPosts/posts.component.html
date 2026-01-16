@@ -1,26 +1,18 @@
 <div class="max-w-5xl mx-auto p-6">
   <!-- Header -->
-  <div
-    class="flex justify-between items-center mb-6 pb-4 border-b border-gray-200"
-  >
+  <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
     <h2 class="text-3xl font-bold text-gray-900">Posts</h2>
-    <button
-      class="px-5 py-2.5 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 transition shadow-sm"
-      (click)="createPost()"
-    >
+    <button class="px-5 py-2.5 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 transition shadow-sm"
+      (click)="createPost()">
       + Nuevo Post
     </button>
   </div>
 
   <!-- Buscador -->
   <div class="mb-6">
-    <input
-      type="text"
-      placeholder="Buscar por título, autor o contenido..."
-      [value]="search()"
+    <input type="text" placeholder="Buscar por título, autor o contenido..." [value]="search()"
       (input)="onSearchChange($any($event.target).value)"
-      class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-    />
+      class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
   </div>
 
   <!-- Loading -->
@@ -31,10 +23,7 @@
   <!-- Lista de Posts -->
   <div *ngIf="!loading()">
     <!-- Mensaje cuando no hay posts -->
-    <div
-      *ngIf="filteredPosts().length === 0"
-      class="text-center py-12 bg-gray-50 rounded-lg"
-    >
+    <div *ngIf="posts().length === 0" class="text-center py-12 bg-gray-50 rounded-lg">
       <p class="text-gray-600" *ngIf="search()">
         No se encontraron posts con "{{ search() }}"
       </p>
@@ -44,18 +33,15 @@
     </div>
 
     <!-- Changed from grid layout to forum-style vertical list -->
-    <div class="space-y-4" *ngIf="filteredPosts().length > 0">
+    <div class="space-y-4" *ngIf="posts().length > 0">
+
       <div
         class="bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200"
-        *ngFor="let post of filteredPosts()"
-      >
+        *ngFor="let post of posts()">
         <!-- Post Header con título y metadata -->
         <div class="p-5 pb-3">
-          <h3
-            class="text-xl font-bold text-gray-900 mb-2 hover:text-blue-600 cursor-pointer"
-            appHighlight
-            (click)="viewPostDetails(post._id)"
-          >
+          <h3 class="text-xl font-bold text-gray-900 mb-2 hover:text-blue-600 cursor-pointer" appHighlight
+            (click)="viewPostDetails(post._id)">
             {{ post.title }}
           </h3>
 
@@ -76,32 +62,44 @@
         </div>
 
         <!-- Footer con acciones -->
-        <div
-          class="px-5 py-3 bg-gray-50 border-t border-gray-100 flex justify-end gap-2"
-        >
+        <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 flex justify-end gap-2">
           <button
             class="px-4 py-2 text-sm rounded-md font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition"
-            (click)="viewPostDetails(post._id)"
-            title="Ver detalle"
-          >
+            (click)="viewPostDetails(post._id)" title="Ver detalle">
             Ver Detalles
           </button>
-          <button
-            class="px-4 py-2 text-sm rounded-md font-medium text-white bg-blue-600 hover:bg-blue-700 transition"
-            (click)="editPost(post._id)"
-            title="Editar"
-          >
+          <button class="px-4 py-2 text-sm rounded-md font-medium text-white bg-blue-600 hover:bg-blue-700 transition"
+            (click)="editPost(post._id)" title="Editar">
             Editar
           </button>
-          <button
-            class="px-4 py-2 text-sm rounded-md font-medium text-white bg-red-600 hover:bg-red-700 transition"
-            (click)="deletePost(post._id)"
-            title="Eliminar"
-          >
+          <button class="px-4 py-2 text-sm rounded-md font-medium text-white bg-red-600 hover:bg-red-700 transition"
+            (click)="deletePost(post._id)" title="Eliminar">
             Eliminar
           </button>
         </div>
       </div>
     </div>
+
   </div>
+  <!-- Paginación -->
+  <div class="mt-6 flex items-center justify-between" *ngIf="!loading() && posts().length > 0">
+    <p class="text-sm text-gray-500">
+      Total: {{ totalItems() }} · Página {{ page() }} de {{ totalPages() }}
+    </p>
+
+    <div class="flex gap-2">
+      <button
+        class="px-4 py-2 text-sm rounded border border-gray-300 bg-white hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        [disabled]="page() === 1" (click)="prevPage()">
+        ← Anterior
+      </button>
+
+      <button
+        class="px-4 py-2 text-sm rounded border border-gray-300 bg-white hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        [disabled]="page() === totalPages()" (click)="nextPage()">
+        Siguiente →
+      </button>
+    </div>
+  </div>
+
 </div>

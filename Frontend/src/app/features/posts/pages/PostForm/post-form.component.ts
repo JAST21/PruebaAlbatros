@@ -18,6 +18,7 @@ import { BaseComponent } from '../../../../shared/components/base.component';
   templateUrl: './post-form.component.html',
   styleUrl: './post-form.component.css'
 })
+
 export class PostFormComponent extends BaseComponent implements OnInit {
 
   form!: FormGroup;
@@ -72,16 +73,30 @@ export class PostFormComponent extends BaseComponent implements OnInit {
     });
   }
 
-  // Manejar el envío del formulario
+  // envio de datos
   submit(): void {
     if (this.form.invalid) return;
     this.loading = true;
 
-    // Determinar si crear o actualizar el post
-    const action = this.isEditMode ? this.postsService.updatePost(this.postId!, this.form.value)
-      : this.postsService.createPost(this.form.value);
+    const raw = this.form.value;
 
-    // Suscribirse a la acción correspondiente
+    const payload = {
+      title: raw.title?.trim(),
+      body: raw.body?.trim(),
+      author: raw.author?.trim(),
+    };
+
+    // .trim para los input
+    if (!payload.title || !payload.body || !payload.author) {
+      this.loading = false;
+      alert('Todos los campos son obligatorios.');
+      return;
+    }
+
+    const action = this.isEditMode
+      ? this.postsService.updatePost(this.postId!, payload)
+      : this.postsService.createPost(payload);
+
     action.subscribe({
       next: () => {
         this.loading = false;
@@ -89,7 +104,8 @@ export class PostFormComponent extends BaseComponent implements OnInit {
       },
       error: () => {
         this.loading = false;
-      }
+      },
     });
   }
+
 }

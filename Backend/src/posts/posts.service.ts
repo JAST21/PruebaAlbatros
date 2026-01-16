@@ -14,11 +14,44 @@ export class PostsService {
         return createdPost;
     }
 
-    // obtiene todos los posts ordenados por fecha de creación en orden descendente
-    async findAll() {
-        const posts = await this.postModel.find().sort({ createdAt: -1 }).exec();
-        return posts;
+    async findAllPaginated(search = '', page = 1, limit = 10) {
+        const safePage = Math.max(1, page);
+        const safeLimit = Math.min(50, Math.max(1, limit));
+        const skip = (safePage - 1) * safeLimit;
+
+        const filter = search
+            ? {
+                $or: [
+                    { title: { $regex: search, $options: 'i' } },
+                    { body: { $regex: search, $options: 'i' } },
+                    { author: { $regex: search, $options: 'i' } },
+                ],
+            }
+            : {};
+
+        const [items, totalItems] = await Promise.all([
+            this.postModel
+                .find(filter)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(safeLimit)
+                .exec(),
+            this.postModel.countDocuments(filter).exec(),
+        ]);
+
+        const totalPages = Math.max(1, Math.ceil(totalItems / safeLimit));
+
+        return {
+            items,
+            meta: {
+                page: safePage,
+                limit: safeLimit,
+                totalItems,
+                totalPages,
+            },
+        };
     }
+
 
     // obtiene un post por su id
     async findOne(id: string) {

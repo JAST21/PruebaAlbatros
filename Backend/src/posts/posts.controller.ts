@@ -1,8 +1,8 @@
-import { Controller, Body, Get, Post, Param, Put, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Body, Get, Post, Param, Put, Delete, UseGuards, Query } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/CreatePostDto.dto';
 import { UpdatePostDto } from './dto/UpdatePostDto.dto';
-import { ApiResponse } from 'src/common/responses/ApiResponse';
+import { ApiResponse } from '../common/responses/ApiResponse';
 
 @UseGuards()
 @Controller('posts')
@@ -15,12 +15,21 @@ export class PostsController {
         return ApiResponse.success(await this.postsService.create(createPostDto), 'Post creado exitosamente');
     }
 
-    //endpoint para obtener todos los posts
+    //endpoint para obtener posts
     @Get()
-    async findAll() {
-        return ApiResponse.success(await this.postsService.findAll(), 'Posts obtenidos exitosamente');
-    }
+    async findAll(
+        @Query('search') search = '',
+        @Query('page') page = '1',
+        @Query('limit') limit = '10',
+    ) {
+        const data = await this.postsService.findAllPaginated(
+            search,
+            Number(page),
+            Number(limit),
+        );
 
+        return ApiResponse.success(data, 'Posts obtenidos exitosamente');
+    }
     //endpoint para obtener un post por su id
     @Get(':id')
     async findOne(@Param('id') id: string) {

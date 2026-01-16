@@ -1,101 +1,90 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { PostsService } from '../../services/posts.service';
-import { Post } from '../../../../shared/models/post.model';
 import { TruncatePipe } from '../../../../shared/pipes/truncate.pipe';
 import { HighlightDirective } from '../../../../shared/directives/highlight.directive';
-// Decorador del componente
+import { DEFAULT_PAGE_SIZE } from '../../../../core/utils/pagination.utils';
 
 @Component({
   selector: 'app-posts',
   standalone: true,
   imports: [CommonModule, FormsModule, TruncatePipe, HighlightDirective],
   templateUrl: './posts.component.html',
-  styleUrl: './posts.component.css'
+  styleUrl: './posts.component.css',
 })
 
-// Componente para manejar y mostrar posts
 export class PostsComponent implements OnInit {
-
-  //signals
   posts = this.postsService.posts;
   loading = this.postsService.loading;
+
   search = signal<string>('');
 
-  // computed para filtrar posts según el término de búsqueda
-  filteredPosts = computed(() => {
-    const searchTerm = this.search().toLowerCase();
-    if (!searchTerm) {
-      return this.posts();
-    }
-    // Filtra los posts que coinciden con el término de búsqueda en título, cuerpo o autor
-    return this.posts().filter(post =>
-      post.title.toLowerCase().includes(searchTerm) ||
-      post.body.toLowerCase().includes(searchTerm) ||
-      post.author.toString().includes(searchTerm)
-    );
-  });
-  // Inyección del servicio de posts
-  constructor(private postsService: PostsService,
-    private roouter: Router
-  ) { }
+  page = signal<number>(1);
+  limit = signal<number>(DEFAULT_PAGE_SIZE)
 
-  // Inicialización del componente
+  totalPages = signal<number>(1);
+  totalItems = signal<number>(0);
+
+  constructor(private postsService: PostsService, private roouter: Router) { }
+
   ngOnInit(): void {
     this.loadPosts();
   }
 
-  // Método para cargar los posts desde el servicio
   loadPosts(): void {
-    this.loading.set(true);
-    this.postsService.getPosts().subscribe({
+    this.postsService.getPosts(this.search(), this.page(), this.limit()).subscribe({
       next: (response) => {
-        this.posts.set(response.data);
-        this.loading.set(false);
+        console.log('GET /posts RESPONSE =>', response);
+        this.totalPages.set(response.data.meta.totalPages);
+        this.totalItems.set(response.data.meta.totalItems);
       },
-      error: (error) => {
-        console.error('Error al cargar los posts:', error);
-        this.loading.set(false);
-      }
-
+      error: (error) => console.error('Error al cargar los posts:', error),
     });
   }
 
-  // Método para manejar el cambio en el campo de búsqueda
   onSearchChange(value: string): void {
     this.search.set(value);
+    this.page.set(1);
+    this.loadPosts();
   }
 
-  // Método para navegar a la creación de un nuevo post
+  nextPage(): void {
+    if (this.page() < this.totalPages()) {
+      this.page.update((p) => p + 1);
+      this.loadPosts();
+    }
+  }
+
+  prevPage(): void {
+    if (this.page() > 1) {
+      this.page.update((p) => p - 1);
+      this.loadPosts();
+    }
+  }
+
   createPost(): void {
     this.roouter.navigate(['/posts/create']);
   }
 
-  // Método para navegar a los detalles de un post
   viewPostDetails(postId: string): void {
     this.roouter.navigate(['/posts', postId]);
   }
 
-  // Método para navegar a la edición de un post
   editPost(postId: string): void {
     this.roouter.navigate(['/posts/edit', postId]);
   }
 
-  // Método para eliminar un post
   deletePost(postId: string): void {
-    if (confirm('¿Estás seguro de que deseas eliminar este post?')) {
-      this.postsService.deletePost(postId).subscribe({
-        next: () => {
-          // Actualiza la lista de posts después de eliminar
-          this.posts.update(posts => posts.filter(post => post._id !== postId));
-          alert('Post eliminado exitosamente.');
-        },
-        error: (error) => {
-          console.error('Error al eliminar el post:', error);
-        }
-      });
-    }
+    if (!confirm('¿Estás seguro de que deseas eliminar este post?')) return;
+
+    this.postsService.deletePost(postId).subscribe({
+      next: () => {
+        // refresca para mantener meta y página consistentes
+        this.loadPosts();
+      },
+      error: (error) => console.error('Error al eliminar el post:', error),
+    });
   }
 }
