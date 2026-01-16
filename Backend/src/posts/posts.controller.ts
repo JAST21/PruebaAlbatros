@@ -1,9 +1,10 @@
-import { Controller, Body, Get, Post, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Body, Get, Post, Param, Put, Delete, UseGuards } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/CreatePostDto.dto';
 import { UpdatePostDto } from './dto/UpdatePostDto.dto';
 import { ApiResponse } from 'src/common/responses/ApiResponse';
 
+@UseGuards()
 @Controller('posts')
 export class PostsController {
     constructor(private readonly postsService: PostsService) { }
