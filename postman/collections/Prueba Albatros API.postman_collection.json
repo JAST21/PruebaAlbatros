@@ -1,0 +1,288 @@
+{
+  "info": {
+    "_postman_id": "fb426da5-92fb-4504-bf65-0026e0838e3c",
+    "name": "Prueba Albatros API",
+    "description": "### Welcome to Postman! This is your first collection. \n\nCollections are your starting point for building and testing APIs. You can use this one to:\n\n• Group related requests\n• Test your API in real-world scenarios\n• Document and share your requests\n\nUpdate the name and overview whenever you’re ready to make it yours.\n\n[Learn more about Postman Collections.](https://learning.postman.com/docs/collections/collections-overview/)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "login",
+          "id": "53df87b5-cc97-4442-bcbe-a54c670b99ec",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"admin@example.com\",\r\n    \"password\": \"123456\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "85e4d21d-a152-4a42-a323-27e1ad20756f"
+    },
+    {
+      "name": "posts",
+      "item": [
+        {
+          "name": "createPost",
+          "id": "c8a6dbbb-64ed-4dde-a66a-c846d3feebc4",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"Mi primer post\",\r\n  \"author\": \"Jallmar\",\r\n  \"body\": \"Contenido del post de prueba\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/posts",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "posts"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "postsPaginacion",
+          "id": "48a82008-fa8e-4660-bf57-df400461e474",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/posts?search=&page=1&limit=10",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "posts"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": ""
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "bulk",
+          "id": "402fc146-2faf-4b58-a601-5ca50dc5311f",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "[\r\n  {\r\n    \"title\": \"Post masivo 1\",\r\n    \"author\": \"Jallmar\",\r\n    \"body\": \"Contenido del post 1\"\r\n  },\r\n  {\r\n    \"title\": \"Post masivo 2\",\r\n    \"author\": \"Jallmar\",\r\n    \"body\": \"Contenido del post 2\"\r\n  }\r\n]\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/posts/bulk",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "posts",
+                "bulk"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "deletePost",
+          "id": "010e20f9-4bcf-4b68-80ee-b1cfe04531c9",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/posts",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "posts"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "updatePost",
+          "id": "a3607620-1fc6-454a-8b99-156c8676133b",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/posts/bulk",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "posts",
+                "bulk"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "New Request",
+          "id": "34d0f75d-e92d-453e-9d08-0d38a5a91010",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "b2a4fde2-3fe7-4f66-8f28-433642c0c2c7"
+    },
+    {
+      "name": "comments",
+      "item": [
+        {
+          "name": "createComment",
+          "id": "b67d9b67-a5eb-4d94-aeb3-ef2559643168",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsImlhdCI6MTc2ODYxMzE0MiwiZXhwIjoxNzY4NjE2NzQyfQ.54ddyzSPT5M8BwfNGj8hcw-ZNPNfbMiI4yMU8DJ1yoI",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"postId\": \"696adec91ff0eab5802ce725\",\r\n  \"name\": \"Ana\",\r\n  \"email\": \"jallmar123@email.com\",\r\n  \"body\": \"I really enjoyed this post!\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/comments",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "comments"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "deleteComment",
+          "id": "c75de24f-90db-4af0-b869-b5a9950f79b2",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/comments/696ae5662b8e95aa4d6fe059",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "comments",
+                "696ae5662b8e95aa4d6fe059"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getCommentsPorPost",
+          "id": "ab6c86fa-c108-43a8-8792-59fcb806221e",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "1e439059-195a-408f-9515-2f42e7df615a"
+    }
+  ]
+}
